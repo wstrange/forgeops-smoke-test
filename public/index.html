@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ForgeOps Smoke Test</title>
+</head>
+<body>
+
+<p>You can use curl to run the smoke test. For example:</p>
+<br>
+<pre>
+    curl 'https://smoketest-7escakmhgq-uk.a.run.app/test' \
+    --data 'fqdn=nightly.iam.forgeops.com&amadminPassword=p3tqhd07v4u6aekvhivj952ffionwwf1'
+</pre>
+
+<p>Or use this form:</p>
+
+<form action="/test" method="post">
+    <label for="fqdn">FQDN:</label>
+    <input type="text" id="fqdn" value="nightly.iam.forgeops.com" size="32" name="fqdn"><br><br>
+    <label for="amadminPassword">AMAdmin password:</label>
+    <input type="text" id="amadminPassword" size="32" name="amadminPassword"><br><br>
+    <input type="submit" value="Submit">
+</form>
+</body>
+</html>
