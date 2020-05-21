@@ -10,6 +10,7 @@ steps:
 - name: 'gcr.io/cloud-builders/gcloud'
   args: ['run', 'deploy', 'smoketest', '--image',
          'gcr.io/$PROJECT_ID/smoketest', '--region', 'us-east4',
-         '--platform', 'managed', '--allow-unauthenticated']
+         '--platform', 'managed', '--allow-unauthenticated',
+          '--set-env-vars=SLACK_URL=${_SLACK_URL}' ]
 images:
 - gcr.io/$PROJECT_ID/smoketest

@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:forgerock_smoke_test/forgerock_smoke_test.dart';
+import 'package:forgeops_smoke_test/forgerock_smoke_test.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:shelf/shelf_io.dart' as io;
@@ -27,6 +27,9 @@ void main(List<String> args) async {
     exitCode = 64;
     return;
   }
+
+  var slackUrl = Platform.environment['SLACK_URL'];
+
   var staticHandler = createStaticHandler('public', defaultDocument: 'index.html');
 
   var app = Router();
@@ -43,9 +46,11 @@ void main(List<String> args) async {
       var cfg = TestConfiguration('https://$f',p['amadminPassword']);
       test = SmokeTest(cfg);
       await test.runSmokeTest();
+      await sendSlackUpdate(slackUrl, test.getPrettyResults());
       return Response.ok(_results2Json(test), headers:  headers);
     }
     catch(e) {
+      await sendSlackUpdate(slackUrl,'FAILED: ${test.getPrettyResults()}',showFailIcon: true);
       return Response.internalServerError(body: _results2Json(test));
     }
     finally {

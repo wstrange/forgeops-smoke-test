@@ -1,4 +1,4 @@
-import 'package:forgerock_smoke_test/rest/idm_rest.dart';
+import 'package:forgeops_smoke_test/rest/idm_rest.dart';
 import 'test_configuration.dart';
 import '../rest/am_rest.dart';
 import '../rest/idm_rest.dart';
@@ -27,6 +27,15 @@ class TestRunner {
   final List<TestResult> _results = [];
 
   List<TestResult> get testResults => _results;
+
+  String getPrettyResults() {
+    var s = StringBuffer('Smoke Test\n');
+    _results.forEach((r) {
+      s.write('$r\n');
+    });
+    return s.toString();
+  }
+
 
   // return test results as json
   List<Map<String, dynamic>> toJson() =>
