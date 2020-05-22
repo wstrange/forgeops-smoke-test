@@ -4,8 +4,8 @@ import 'package:forgeops_smoke_test/forgerock_smoke_test.dart';
 
 String testJson = '''
 {
-  "fqdn": "https://xxnightly.iam.forgeops.com",
-  "amadminPassword": "6pbdxhe0xyvhvs1ppo99beqiyzgq4wh1"
+  "fqdn": "https://smoke.iam.forgeops.com",
+  "amadminPassword": "enter-password-here"
 }
 ''';
 
@@ -20,7 +20,7 @@ void main() async {
 
   try {
     await test.runSmokeTest();
-    await sendSlackUpdate(url,test.getPrettyResults());
+    await sendSlackUpdate(slack,test.getPrettyResults());
   }
   catch(e) {
     await sendSlackUpdate(slack,'FAILED! ${test.getPrettyResults()}', showFailIcon: true );
