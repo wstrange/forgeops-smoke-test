@@ -9,11 +9,11 @@ Future<void> sendSlackUpdate(String url, String text, {String channel = '#cloud-
     print('slack url not configured');
     return; // no slack url configured
   }
+
   _dio.options.contentType= Headers.formUrlEncodedContentType;
   var icon = showFailIcon ? ':face_vomiting:' : ':heavy_check_mark';
-  print('icon = $icon');
-  //  _dio.interceptors.add(
-  //        LogInterceptor(responseBody: true, requestBody: true, request: true))
+//  _dio.interceptors.add(
+//        LogInterceptor(responseBody: true, requestBody: true, request: true));
   var j  = jsonEncode( {
     'channel' : channel,
     'username': 'smoke-test',
@@ -24,6 +24,9 @@ Future<void> sendSlackUpdate(String url, String text, {String channel = '#cloud-
     var r = await _dio.post(url, data: {'payload': j });
   }
   catch(e) {
+    if( e is DioError ) {
+      print('url = $url ${e.response.statusMessage} ${e.response.statusCode}');
+    }
     print('error sending to slack $e');
   }
 }
