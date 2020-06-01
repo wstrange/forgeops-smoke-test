@@ -3,21 +3,25 @@ import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'dart:convert';
 
+import 'package:forgeops_smoke_test/forgerock_smoke_test.dart';
+
 // Make REST calls to ForgeRock AM.
 class AMRest {
-  final String _amUrl;
+  String _amUrl;
   String _amCookie;
-  final String _adminPassword;
+  String _adminPassword;
   CookieJar _cookieJar;
   final Dio _dio;
+  TestConfiguration _config;
 
-  AMRest(String fqdn, this._adminPassword)
-      : _dio = Dio(),
-        _amUrl = '$fqdn/am' {
+  AMRest(this._config) : _dio = Dio() {
     _cookieJar = CookieJar();
     _dio.interceptors.add(CookieManager(_cookieJar));
-    // Uncomment if you want to view requests
-    _dio.interceptors.add(LogInterceptor(responseBody: true));
+    _amUrl = '${_config.fqdn}/am';
+    _adminPassword = _config.amAdminPassword;
+    if (_config.debug) {
+      _dio.interceptors.add(LogInterceptor(responseBody: true));
+    }
   }
 
   Future<String> authenticateAsAdmin() async {

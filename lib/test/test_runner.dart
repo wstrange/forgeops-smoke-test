@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
 import 'package:forgeops_smoke_test/rest/idm_rest.dart';
 import 'test_configuration.dart';
 import '../rest/am_rest.dart';
@@ -15,9 +18,10 @@ class TestResult {
   Map<String, Object> toJson() =>
       {'test': test, 'message': message, 'time': testTimeMsec};
 
+  String toJsonString() =>  json.encode(toJson());
+
   @override
-  String toString() =>
-      '$test,msg=$message,passed=$passed,time(msec)=$testTimeMsec';
+  String toString() => toJsonString();
 }
 
 class TestRunner {
@@ -41,18 +45,26 @@ class TestRunner {
   List<Map<String, dynamic>> toJson() =>
       _results.map((r) => r.toJson()).toList();
 
+
   TestRunner(this._config) {
     // create the rest API clients for testing
-    am = AMRest('${_config.fqdn}', _config.amAdminPassword);
-    idm = IDMRest('${_config.fqdn}', am);
+    am = AMRest(_config);
+    idm = IDMRest(_config, am);
   }
 
   Future<void> test(String test, TestFunction testFun) async {
     var _start = DateTime.now();
     try {
       await testFun();
-    } catch (e) {
-      _results.add(TestResult(test, 'failed $e', false, _testTime(_start)));
+    } on DioError catch (e) {
+      var msg = '';
+      if( e.response != null ) {
+        msg = '${e.response.statusCode} ${e.response.statusMessage} ${e.response.data} ${e.response.headers}';
+      }
+      else  {
+        msg = '${e.request} ${e.message}';
+      }
+      _results.add(TestResult(test, 'FAIL $msg ', false, _testTime(_start)));
       rethrow;
     }
     _results.add(TestResult(test, 'ok', true, _testTime(_start)));

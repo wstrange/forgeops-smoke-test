@@ -1,23 +1,23 @@
 import 'package:dio/dio.dart';
+import 'package:forgeops_smoke_test/forgerock_smoke_test.dart';
 import 'am_rest.dart';
 
 // A Client that makes IDM REST calls
 // See https://backstage.forgerock.com/docs/idm/6.5/integrators-guide/#appendix-rest
 class IDMRest {
   final AMRest _amRest;
-  final _fqdn;
-  final String _adminClientId;
+  final String _adminClientId = 'idm-admin-ui'; // id of the idm admin client
   final Dio _dio;
   String _accessToken;
+  final TestConfiguration _config;
 
-  IDMRest(
-    this._fqdn,
-    this._amRest, [
-    this._adminClientId = 'idm-admin-ui',
-  ]) : _dio = Dio() {
-    // uncomment if you want to debug requests
-    // _dio.interceptors.add(
-    //    LogInterceptor(responseBody: true, requestBody: true, request: true));
+  String get _fqdn => _config.fqdn;
+
+  IDMRest(this._config, this._amRest) : _dio = Dio() {
+
+   if( _config.debug ) {
+        LogInterceptor(responseBody: true, requestBody: true, request: true);
+    }
   }
 
   String get oauth2redirectUrl => '$_fqdn/admin/appAuthHelperRedirect.html';
@@ -73,10 +73,13 @@ class IDMRest {
   Future<String> queryUser(String userName) async {
     var q = {'userName': userName, '_queryFilter': 'userName eq "$userName"'};
     var r = await _dio.get('$_fqdn/openidm/managed/user', queryParameters: q);
-    print('got user = ${r.statusCode} ${r.data}');
+    var payload = r.data;
+    //print('got user = ${r.statusCode} $payload');
     // extract the uuid
-    var id = r.data['result'].first['_id'];
-    return id;
+    if( payload == null || payload['resultCount'] == 0 ) {
+      return null;
+    }
+    return payload['result'].first['_id'];
   }
 
   Future<String> modifyUser(String id) async {

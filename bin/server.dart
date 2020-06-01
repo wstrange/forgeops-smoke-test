@@ -43,7 +43,13 @@ void main(List<String> args) async {
       var p = Uri(query: s).queryParameters;
       print('got $s params = $p');
       var f = p['fqdn'];
-      var cfg = TestConfiguration('https://$f',p['amadminPassword']);
+      var d = p['debug'];
+      var _debug = false;
+      if( d != null && d == 'true' ) {
+        _debug = true;
+      }
+
+      var cfg = TestConfiguration('https://$f',p['amadminPassword'], debug: _debug);
       test = SmokeTest(cfg);
       await test.runSmokeTest();
       await sendSlackUpdate(slackUrl, test.getPrettyResults());

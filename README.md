@@ -19,6 +19,10 @@ curl 'https://smoketest-7escakmhgq-uk.a.run.app/test' \
     --data 'fqdn=nightly.iam.forgeops.com&amadminPassword=secretpassword'
 ```
 
+The POST form arguments are:
+* fqdn - the fully qualified domain name (do not include the https)
+* amadminPassword - the password for the `amadin` user
+
 A 200 response means the test has passed. See the json that is returned for the test results.
 
 Anything other than a 200 is a test failure. Note the test stops immediately on the first error. 
