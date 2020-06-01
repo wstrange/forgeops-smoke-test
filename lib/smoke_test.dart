@@ -8,7 +8,6 @@ class SmokeTest extends TestRunner {
   // Run all the smoke tests.
   // Any exception causes the test to stop immediately
   Future<void> runSmokeTest() async {
-    print('run smoke test');
     try {
       await amTests();
       await idmTests();

@@ -31,9 +31,10 @@ class TestRunner {
   final List<TestResult> _results = [];
 
   List<TestResult> get testResults => _results;
+  TestConfiguration get config => _config;
 
   String getPrettyResults() {
-    var s = StringBuffer('Smoke Test\n');
+    var s = StringBuffer('Smoke Test for ${_config.fqdn}\n');
     _results.forEach((r) {
       s.write('$r\n');
     });
