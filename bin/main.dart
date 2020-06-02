@@ -29,7 +29,7 @@ void main() async {
     await sendSlackUpdate(slack,'FAILED! ${test.getPrettyResults()}', showFailIcon: true );
   }
 
-  print('test results= ${test.testResults}');
+  print('test results= ${test.toJson()}');
 
 
   await test.close();

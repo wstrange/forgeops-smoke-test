@@ -29,10 +29,12 @@ class TestRunner {
   AMRest am;
   IDMRest idm;
   final List<TestResult> _results = [];
+  final DateTime _startedAt;
 
   List<TestResult> get testResults => _results;
   TestConfiguration get config => _config;
 
+  // Get results suitable for slack message
   String getPrettyResults() {
     var s = StringBuffer('Smoke Test for ${_config.fqdn}\n');
     _results.forEach((r) {
@@ -43,11 +45,16 @@ class TestRunner {
 
 
   // return test results as json
-  List<Map<String, dynamic>> toJson() =>
-      _results.map((r) => r.toJson()).toList();
+  Map<String, dynamic> toJson() {
+    return {
+      'fqdn': _config.fqdn,
+      'startedAt': _startedAt.toIso8601String(),
+      'runTime': DateTime.now().difference(_startedAt).inMilliseconds,
+      'results:': _results.map((r) => r.toJson()).toList()
+    };
+  }
 
-
-  TestRunner(this._config) {
+  TestRunner(this._config): _startedAt = DateTime.now() {
     // create the rest API clients for testing
     am = AMRest(_config);
     idm = IDMRest(_config, am);

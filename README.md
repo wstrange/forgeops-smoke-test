@@ -48,6 +48,4 @@ native compilation using `dart2native` the docker image size is less than 6 MB!
 
 ## TODO
 
-* Add a slack URL to notify on test status
-
 
