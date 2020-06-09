@@ -2,8 +2,10 @@ import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'dart:convert';
-
+import 'dart:math';
 import 'package:forgeops_smoke_test/forgerock_smoke_test.dart';
+
+final _random = Random();
 
 // Make REST calls to ForgeRock AM.
 class AMRest {
@@ -16,9 +18,12 @@ class AMRest {
 
   AMRest(this._config) : _dio = Dio() {
     _cookieJar = CookieJar();
+    // The cookie manager saves cookies such as iPlanetPro, and then
+    // sends back them on future requests.
     _dio.interceptors.add(CookieManager(_cookieJar));
     _amUrl = '${_config.fqdn}/am';
     _adminPassword = _config.amAdminPassword;
+
     if (_config.debug) {
       _dio.interceptors.add(LogInterceptor(responseBody: true));
     }
@@ -47,7 +52,7 @@ class AMRest {
   // token that can be used for IDM.
   Future<String> authCodeFlow(
       {String redirectUrl, String client_id, List<String> scopes}) async {
-    if (_amCookie != null) {
+    if (_amCookie == null) {
       await authenticateAsAdmin();
     }
     var headers = {'accept-api-version': 'resource=2.1'};
@@ -136,6 +141,56 @@ class AMRest {
         },
         options: options);
     return r.data as Map<String, Object>;
+  }
+
+  // Self register a test use.
+  Future<Map> selfRegisterUser() async {
+    var regURl = '$_amUrl/json/realms/root/authenticate';
+    var q = {'authIndexType': 'service', 'authIndexValue': 'Registration'};
+    var options = RequestOptions(
+        headers: {'accept-api-version': 'protocol=1.0,resource=2.1'});
+
+    var _d =
+        Dio(); // we dont want to reuse the saved cookies - so create a new request
+    if (_config.debug) {
+      _d.interceptors.add(LogInterceptor());
+    }
+
+    var r = await _d.post(regURl, queryParameters: q, options: options);
+    _check200(r);
+
+    var copyMap = jsonDecode(jsonEncode(r.data))
+        as Map<String, Object>; // kludgy, but works
+    var callbacks = copyMap['callbacks'] as List;
+
+    var rand = _random.nextInt(1000000);
+    var user = 'tuser$rand';
+    // This is quite kludgy as it depends on the order of the callbacks
+    // todo: Eventually we should check for order
+    callbacks[0]['input'][0]['value'] = user;
+    callbacks[1]['input'][0]['value'] = 'Yogi';
+    callbacks[2]['input'][0]['value'] = 'Bear';
+    callbacks[3]['input'][0]['value'] = '$user@example.com';
+    callbacks[4]['input'][0]['value'] = false;
+    callbacks[5]['input'][0]['value'] = false;
+    callbacks[6]['input'][0]['value'] = 'Passw0rd';
+    callbacks[7]['input'][0]['value'] = 'What\'s your favorite color?';
+    callbacks[7]['input'][1]['value'] = 'green';
+    callbacks[8]['input'][0]['value'] = 'Who was your first employer?';
+    callbacks[8]['input'][1]['value'] = 'forgerock';
+    callbacks[9]['input'][0]['value'] = true;
+
+    r = await _d.post(regURl,
+        queryParameters: q, options: options, data: copyMap);
+    _check200(r);
+    r.data['userId'] = user; // we add the user id in case future tests need it
+    return r.data as Map;
+  }
+
+  void _check200(Response r) {
+    if (r.statusCode != 200) {
+      throw Exception('Response error=${r.statusCode} msg=${r.statusMessage}');
+    }
   }
 
   void close() => _dio.close();

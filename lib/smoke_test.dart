@@ -66,22 +66,19 @@ class SmokeTest extends TestRunner {
     await test('IDM Delete user', () async {
       await idm.deleteUser(uuid);
     });
-  }
-
-  // todo: Additional integration tests
-  // log on to the end user UI
-  Future<void> integrationTests() async {
-    var uuid;
 
     // search for non existing user
     await test('Search for non existent user', () async {
-      uuid = await idm.queryUser('nonUser');
-      expect(uuid == null, message: 'uuid was not null!');
+      var id = await idm.queryUser('nonUser');
+      expect(id == null, message: 'uuid was not null!');
     });
+  }
 
+  // Integration tests between AM/IDM
+  Future<void> integrationTests() async {
     // Create some sample users. These get left in place after the test
     // so we can use them for adhoc manual testing
-  
+
     await Future.forEach( [1,2,3,4,5], (i) async {
       var user = 'user.$i';
       var uuid = await idm.queryUser(user);
@@ -91,9 +88,12 @@ class SmokeTest extends TestRunner {
       }
     });
 
+    await test('Self Registration Test', () async {
+      var m = await am.selfRegisterUser();
+      expect(m['tokenId'] != null,
+          message: 'tokenId missing in registration response');
+    });
   }
-
-
 
   // todo: Clean up after all tests
   // This is where we want to delete any users, etc.

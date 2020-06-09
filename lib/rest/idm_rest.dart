@@ -74,7 +74,6 @@ class IDMRest {
     var q = {'userName': userName, '_queryFilter': 'userName eq "$userName"'};
     var r = await _dio.get('$_fqdn/openidm/managed/user', queryParameters: q);
     var payload = r.data;
-    //print('got user = ${r.statusCode} $payload');
     // extract the uuid
     if( payload == null || payload['resultCount'] == 0 ) {
       return null;

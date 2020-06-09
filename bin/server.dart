@@ -44,16 +44,13 @@ void main(List<String> args) async {
       print('got $s params = $p');
       var f = p['fqdn'];
       var d = p['debug'];
-      var _debug = false;
-      if( d != null && d == 'true' ) {
-        _debug = true;
-      }
+      var _debug = (d != null && d == 'true') ? true: false;
 
       var cfg = TestConfiguration('https://$f',p['amadminPassword'], debug: _debug);
       test = SmokeTest(cfg);
       await test.runSmokeTest();
       await sendSlackUpdate(slackUrl, test.getPrettyResults());
-      return Response.ok(_results2Json(test), headers:  headers);
+      return Response.ok(_results2Json(test), headers:  { 'content-type': 'application/json' });
     }
     catch(e) {
       await sendSlackUpdate(slackUrl,'FAILED: ${test.getPrettyResults()}',showFailIcon: true);
@@ -82,5 +79,4 @@ void main(List<String> args) async {
 
 String _results2Json(SmokeTest t) =>  _encoder.convert(t.toJson());
 
-JsonEncoder _encoder = JsonEncoder.withIndent('  ');
-final headers = { 'content-type': 'application/json' };
+final _encoder = JsonEncoder.withIndent('  ');

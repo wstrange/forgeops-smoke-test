@@ -23,7 +23,7 @@ void main() async {
 
   try {
     await test.runSmokeTest();
-    await sendSlackUpdate(slack,test.getPrettyResults());
+    //await sendSlackUpdate(slack,test.getPrettyResults());
   }
   catch(e) {
     await sendSlackUpdate(slack,'FAILED! ${test.getPrettyResults()}', showFailIcon: true );
