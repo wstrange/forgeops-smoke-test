@@ -9,21 +9,21 @@ final _random = Random();
 
 // Make REST calls to ForgeRock AM.
 class AMRest {
-  String _amUrl;
+  final String _amUrl;
   String _amCookie;
-  String _adminPassword;
-  CookieJar _cookieJar;
+  final String _adminPassword;
+  final CookieJar _cookieJar;
   final Dio _dio;
   TestConfiguration _config;
 
-  AMRest(this._config) : _dio = Dio() {
-    _cookieJar = CookieJar();
+  AMRest(this._config)
+      : _dio = Dio(),
+        _cookieJar = CookieJar(),
+        _adminPassword = _config.amAdminPassword,
+        _amUrl = '${_config.fqdn}/am' {
     // The cookie manager saves cookies such as iPlanetPro, and then
     // sends back them on future requests.
     _dio.interceptors.add(CookieManager(_cookieJar));
-    _amUrl = '${_config.fqdn}/am';
-    _adminPassword = _config.amAdminPassword;
-
     if (_config.debug) {
       _dio.interceptors.add(LogInterceptor(responseBody: true));
     }
@@ -150,8 +150,8 @@ class AMRest {
     var options = RequestOptions(
         headers: {'accept-api-version': 'protocol=1.0,resource=2.1'});
 
-    var _d =
-        Dio(); // we dont want to reuse the saved cookies - so create a new request
+    // we dont want to reuse saved cookies - so create a new request
+    var _d = Dio();
     if (_config.debug) {
       _d.interceptors.add(LogInterceptor());
     }

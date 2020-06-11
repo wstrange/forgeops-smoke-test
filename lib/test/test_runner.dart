@@ -36,7 +36,7 @@ class TestRunner {
 
   // Get results suitable for slack message
   String getPrettyResults() {
-    var s = StringBuffer('Smoke Test for ${_config.fqdn}\n');
+    var s = StringBuffer('Smoke Test results for target ${_config.fqdn}\n');
     _results.forEach((r) {
       s.write('$r\n');
     });
@@ -62,10 +62,10 @@ class TestRunner {
 
   Future<void> test(String test, TestFunction testFun) async {
     var _start = DateTime.now();
+    var msg = 'ok';
     try {
       await testFun();
     } on DioError catch (e) {
-      var msg = '';
       if( e.response != null ) {
         msg = '${e.response.statusCode} ${e.response.statusMessage} ${e.response.data} ${e.response.headers}';
       }
@@ -73,9 +73,12 @@ class TestRunner {
         msg = '${e.request} ${e.message}';
       }
       _results.add(TestResult(test, 'FAIL $msg ', false, _testTime(_start)));
-      rethrow;
+      //rethrow;
     }
-    _results.add(TestResult(test, 'ok', true, _testTime(_start)));
+    catch(e) {
+      msg = 'Exception $e';
+    }
+    _results.add(TestResult(test, msg, true, _testTime(_start)));
   }
 
   int _testTime(DateTime start) =>

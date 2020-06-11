@@ -26,10 +26,10 @@ void main() async {
     //await sendSlackUpdate(slack,test.getPrettyResults());
   }
   catch(e) {
-    await sendSlackUpdate(slack,'FAILED! ${test.getPrettyResults()}', showFailIcon: true );
+    //await sendSlackUpdate(slack,'FAILED! ${test.getPrettyResults()}', showFailIcon: true );
   }
 
-  print('test results= ${test.toJson()}');
+  print(test.getPrettyResults());
 
 
   await test.close();

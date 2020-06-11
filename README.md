@@ -42,8 +42,15 @@ the http server run [bin/server.dart](bin/server.dart).
 
 Run `gclouds builds submit`
 
-Thanks to Dart's tree shaking and
-native compilation using `dart2native` the docker image size is less than 6 MB!
+Dart's tree shaking and native compilation using `dart2native` results in a very small docker image (less than 6mb).
+
+
+## Test Side effects
+
+Running the test will:
+ 
+* Create users `user.0` through to `user.5`. If they already exist they will not be re-created.
+* Self-register a user `tuserxxxxx` where xxxxx is a random integer.
 
 
 ## TODO
