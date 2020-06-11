@@ -30,53 +30,49 @@ void main(List<String> args) async {
 
   var slackUrl = Platform.environment['SLACK_URL'];
 
-  var staticHandler = createStaticHandler('public', defaultDocument: 'index.html');
+  var staticHandler =
+      createStaticHandler('public', defaultDocument: 'index.html');
 
   var app = Router();
 
   // POST to the /test endpoint to start the test
   app.post('/test', (Request request) async {
-    SmokeTest test;
+    var body = await request.readAsString(); // get the body
+    var param = Uri(query: body).queryParameters; // parse as URI to extract form params
+    var fqdn = param['fqdn'];
+    var d = param['debug'];
+    var _debug = (d != null && d == 'true') ? true : false;
 
-    try {
-      var s = await request.readAsString();
-      var p = Uri(query: s).queryParameters;
-      print('got $s params = $p');
-      var f = p['fqdn'];
-      var d = p['debug'];
-      var _debug = (d != null && d == 'true') ? true: false;
+    var cfg =
+        TestConfiguration('https://$fqdn', param['amadminPassword'], debug: _debug);
+    var test = SmokeTest(cfg);
+    var testOK = await test.runSmokeTest();
+    await test.close();
 
-      var cfg = TestConfiguration('https://$f',p['amadminPassword'], debug: _debug);
-      test = SmokeTest(cfg);
-      await test.runSmokeTest();
-      return Response.ok(_results2Json(test), headers:  { 'content-type': 'application/json' });
-    }
-    catch(e) {
+    var hostString = '<https://${request.requestedUri.host}|Smoke Service>';
+
+    if (testOK) {
+      await sendSlackUpdate(
+          slackUrl, '$hostString\n\n${test.getPrettyResults()}');
+      return Response.ok(_results2Json(test),
+          headers: {'content-type': 'application/json'});
+    } else {
+      await sendSlackUpdate(
+          slackUrl, '$hostString\n\n${test.getPrettyResults()}',
+          showFailIcon: true);
       return Response.internalServerError(body: _results2Json(test));
     }
-    finally {
-      await test.close();
-      var hostString = '<https://${request.requestedUri.host}|Smoke Service>';
-      await sendSlackUpdate(slackUrl, '$hostString\n\n${test.getPrettyResults()}');
-    }
-
   });
 
-
-  var handler = Cascade()
-      .add(staticHandler)
-      .add(app.handler)
-      .handler;
+  var handler = Cascade().add(staticHandler).add(app.handler).handler;
 
   // Pipelines compose middleware plus a single handler
-  var pipe = const Pipeline()
-      .addMiddleware(logRequests())
-      .addHandler(handler);
+  var pipe = const Pipeline().addMiddleware(logRequests()).addHandler(handler);
 
   var server = await io.serve(pipe, _hostname, port);
   print('Serving at http://${server.address.host}:${server.port}');
 }
 
-String _results2Json(SmokeTest t) =>  _encoder.convert(t.toJson());
+String _results2Json(SmokeTest t) => _encoder.convert(t.toJson());
 
 final _encoder = JsonEncoder.withIndent('  ');

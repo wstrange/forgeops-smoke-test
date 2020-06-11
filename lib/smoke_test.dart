@@ -6,22 +6,22 @@ class SmokeTest extends TestRunner {
   SmokeTest(TestConfiguration config) : super(config);
 
   // Run all the smoke tests.
-  // Any exception causes the test to stop immediately
-  Future<void> runSmokeTest() async {
+  Future<bool> runSmokeTest() async {
     try {
       await amTests();
       await idmTests();
       await integrationTests();
     } catch (e) {
       print('Tests failed with exception ${e}');
-      rethrow;
+      return false;
     }
+    return true; // all tests passed
   }
 
   // Run all the AM tests
   Future<void> amTests() async {
     await test('Authenticate as AMAdmin', () async {
-      var token = await am.authenticateAsAdmin();
+      var token = await amClient.authenticateAsAdmin();
       expect(token != null, message: 'Cant authenticate as amadmin');
     });
 
@@ -45,31 +45,31 @@ class SmokeTest extends TestRunner {
     var testUser = 'testuser01';
 
     await test('IDM Login as Admin', () async {
-      var idm_access_token = await idm.getBearerToken();
+      var idm_access_token = await idmClient.getBearerToken();
       expect(idm_access_token != null);
     });
 
     await test('IDM Admin Create a user', () async {
-      uuid = await idm.createUser(testUser);
+      uuid = await idmClient.createUser(testUser);
       expect(uuid != null, message: 'Can not create user $testUser');
     });
 
     await test('IDM find user', () async {
-      var uid = await idm.queryUser(testUser);
+      var uid = await idmClient.queryUser(testUser);
       expect(uid == uuid, message: 'Test user not found $testUser');
     });
 
     await test('IDM Modify User', () async {
-      await idm.modifyUser(uuid);
+      await idmClient.modifyUser(uuid);
     });
 
     await test('IDM Delete user', () async {
-      await idm.deleteUser(uuid);
+      await idmClient.deleteUser(uuid);
     });
 
-    // search for non existing user
+    // search for a user that does not exist
     await test('Search for non existent user', () async {
-      var id = await idm.queryUser('nonUser');
+      var id = await idmClient.queryUser('nonUser');
       expect(id == null, message: 'uuid was not null!');
     });
   }
@@ -79,23 +79,23 @@ class SmokeTest extends TestRunner {
     // Create some sample users. These get left in place after the test
     // so we can use them for adhoc manual testing
 
-    await Future.forEach( [1,2,3,4,5], (i) async {
+    await Future.forEach([1, 2, 3, 4, 5], (i) async {
       var user = 'user.$i';
-      var uuid = await idm.queryUser(user);
+      var uuid = await idmClient.queryUser(user);
 
-      if( uuid == null ) {
-        await idm.createUser(user);
+      if (uuid == null) {
+        await idmClient.createUser(user);
       }
     });
 
     await test('Self Registration Test', () async {
-      var m = await am.selfRegisterUser();
+      var m = await amClient.selfRegisterUser();
       expect(m['tokenId'] != null,
           message: 'tokenId missing in registration response');
     });
   }
 
   // todo: Clean up after all tests
-  // This is where we want to delete any users, etc.
+  // This is where we want to delete any test users, etc.
   Future<void> cleanupTests() async {}
 }

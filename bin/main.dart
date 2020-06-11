@@ -20,9 +20,10 @@ void main() async {
 
   var cfg = TestConfiguration.fromJson(testJson);
   var test = SmokeTest(cfg);
+  var testOK = false;
 
   try {
-    await test.runSmokeTest();
+    testOK = await test.runSmokeTest();
     //await sendSlackUpdate(slack,test.getPrettyResults());
   }
   catch(e) {
@@ -30,7 +31,6 @@ void main() async {
   }
 
   print(test.getPrettyResults());
-
 
   await test.close();
 }
