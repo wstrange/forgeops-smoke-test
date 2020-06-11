@@ -30,6 +30,7 @@ class TestRunner {
   IDMRest idm;
   final List<TestResult> _results = [];
   final DateTime _startedAt;
+  int _failed = 0; // count of failed tests
 
   List<TestResult> get testResults => _results;
   TestConfiguration get config => _config;
@@ -40,6 +41,9 @@ class TestRunner {
     _results.forEach((r) {
       s.write('$r\n');
     });
+    if( _failed > 0) {
+      s.write('Number of failed tests: $_failed');
+    }
     return s.toString();
   }
 
@@ -50,7 +54,8 @@ class TestRunner {
       'fqdn': _config.fqdn,
       'startedAt': _startedAt.toIso8601String(),
       'runTime': DateTime.now().difference(_startedAt).inMilliseconds,
-      'results:': _results.map((r) => r.toJson()).toList()
+      'results:': _results.map((r) => r.toJson()).toList(),
+      'numberFailedTests' : _failed
     };
   }
 
@@ -60,6 +65,7 @@ class TestRunner {
     idm = IDMRest(_config, am);
   }
 
+  /// Run a test provided as a closure.
   Future<void> test(String test, TestFunction testFun) async {
     var _start = DateTime.now();
     var msg = 'ok';
@@ -67,12 +73,13 @@ class TestRunner {
       await testFun();
     } on DioError catch (e) {
       if( e.response != null ) {
-        msg = '${e.response.statusCode} ${e.response.statusMessage} ${e.response.data} ${e.response.headers}';
+        msg = '${e.response.statusCode} ${e.response.statusMessage}}';
       }
       else  {
         msg = '${e.request} ${e.message}';
       }
-      _results.add(TestResult(test, 'FAIL $msg ', false, _testTime(_start)));
+      ++_failed;
+      _results.add(TestResult(test, 'ERROR $msg ', false, _testTime(_start)));
       //rethrow;
     }
     catch(e) {

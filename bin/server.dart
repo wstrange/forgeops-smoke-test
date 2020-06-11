@@ -49,16 +49,15 @@ void main(List<String> args) async {
       var cfg = TestConfiguration('https://$f',p['amadminPassword'], debug: _debug);
       test = SmokeTest(cfg);
       await test.runSmokeTest();
-
-      await sendSlackUpdate(slackUrl, 'Smoke Test OK: https://${request.url.host}\n${test.getPrettyResults()}');
       return Response.ok(_results2Json(test), headers:  { 'content-type': 'application/json' });
     }
     catch(e) {
-      await sendSlackUpdate(slackUrl,'Smoke Test FAILED https://${request.url.host}\n${test.getPrettyResults()}',showFailIcon: true);
       return Response.internalServerError(body: _results2Json(test));
     }
     finally {
       await test.close();
+      var hostString = '<https://${request.requestedUri.host}|Smoke Service>';
+      await sendSlackUpdate(slackUrl, '$hostString\n\n${test.getPrettyResults()}');
     }
 
   });

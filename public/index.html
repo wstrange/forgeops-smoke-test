@@ -8,12 +8,11 @@
 
 <h1>ForgeOps Smoke Test Service</h1>
 
-<p>This runs a series of tests against a target deployment of ForgeOps.</p>
+<p>Run a series of tests against a target deployment of ForgeOps.</p>
 <p>You can use curl or REST to run the smoke test. For example:</p>
-<br>
 <pre>
     curl 'https://smoketest-7escakmhgq-uk.a.run.app/test' \
-    --data 'fqdn=nightly.iam.forgeops.com&amadminPassword=p3tqhd07v4u6aekvhivj952ffionwwf1'
+      --data 'fqdn=nightly.iam.forgeops.com&amadminPassword=p3tqhd07v4u6aekvhivj952ffionwwf1'
 </pre>
 
 <p>Or use this form for manual testing:</p>
@@ -26,6 +25,6 @@
     <input type="submit" value="Submit">
 </form>
 
-<p>Note: This is provided to test dev or QA instances. Do not post production credentials to this service.</p>
+<p>Note: This is provided to test development or QA instances. Do not post production credentials to this service.</p>
 </body>
 </html>
