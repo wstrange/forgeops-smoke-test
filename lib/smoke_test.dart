@@ -5,7 +5,7 @@ import 'test/test_runner.dart';
 class SmokeTest extends TestRunner {
   SmokeTest(TestConfiguration config) : super(config);
 
-  // Run all the smoke tests.
+  // Run all the smoke tests. Return true if all tests passed
   Future<bool> runSmokeTest() async {
     try {
       await amTests();
@@ -15,7 +15,7 @@ class SmokeTest extends TestRunner {
       print('Tests failed with exception ${e}');
       return false;
     }
-    return true; // all tests passed
+    return failed == 0; // all tests passed?
   }
 
   // Run all the AM tests

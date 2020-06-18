@@ -37,6 +37,7 @@ class TestRunner {
   final List<TestResult> _results = [];
   final DateTime _startedAt;
   int _failed = 0; // count of failed tests
+  int get failed => _failed;
 
   List<TestResult> get testResults => _results;
   TestConfiguration get config => _config;
