@@ -5,6 +5,8 @@ class TestConfiguration {
   String amAdminPassword;
   bool debug;
 
+  static final TEST_PASSWORD = 'Bar1Foo2'; // for creating users, self registration
+
   TestConfiguration(this.fqdn,this.amAdminPassword,{this.debug = false}) ;
 
   TestConfiguration.fromJson(String json) {

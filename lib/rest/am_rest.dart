@@ -173,7 +173,7 @@ class AMRest {
     callbacks[3]['input'][0]['value'] = '$user@example.com';
     callbacks[4]['input'][0]['value'] = false;
     callbacks[5]['input'][0]['value'] = false;
-    callbacks[6]['input'][0]['value'] = 'Passw0rd';
+    callbacks[6]['input'][0]['value'] = TestConfiguration.TEST_PASSWORD;
     callbacks[7]['input'][0]['value'] = 'What\'s your favorite color?';
     callbacks[7]['input'][1]['value'] = 'green';
     callbacks[8]['input'][0]['value'] = 'Who was your first employer?';

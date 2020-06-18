@@ -95,7 +95,7 @@ class IDMRest {
         'givenName': '$id',
         'sn': '$id',
         'mail': '$id@test.com',
-        'password': 'Bar1Foo2'
+        'password': TestConfiguration.TEST_PASSWORD,
       };
 
   void close() => _dio.close();
