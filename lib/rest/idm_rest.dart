@@ -1,24 +1,18 @@
 import 'package:dio/dio.dart';
 import 'package:forgeops_smoke_test/forgerock_smoke_test.dart';
+import 'package:forgeops_smoke_test/rest/rest_client.dart';
 import 'am_rest.dart';
 
 // A Client that makes IDM REST calls
 // See https://backstage.forgerock.com/docs/idm/6.5/integrators-guide/#appendix-rest
-class IDMRest {
+class IDMRest extends RESTClient {
   final AMRest _amRest;
   final String _adminClientId = 'idm-admin-ui'; // id of the idm admin client
-  final Dio _dio;
   String _accessToken;
-  final TestConfiguration _config;
 
-  String get _fqdn => _config.fqdn;
+  String get _fqdn => testConfig.fqdn;
 
-  IDMRest(this._config, this._amRest) : _dio = Dio() {
-
-   if( _config.debug ) {
-        LogInterceptor(responseBody: true, requestBody: true, request: true);
-    }
-  }
+  IDMRest(TestConfiguration c, this._amRest) : super(c) ;
 
   String get oauth2redirectUrl => '$_fqdn/admin/appAuthHelperRedirect.html';
 
@@ -32,7 +26,7 @@ class IDMRest {
 
     // set the dio base options for the bearer token
     // this wil add the bearer token to all future requests.
-    _dio.options.headers['Authorization'] = 'Bearer $_accessToken';
+    dio.options.headers['Authorization'] = 'Bearer $_accessToken';
     return _accessToken;
   }
 
@@ -46,13 +40,13 @@ class IDMRest {
 //  Future<String> _getAccessToken() async {
 //    _accessToken =
 //        await _amRest.getOAuth2Token(_adminClientId, _adminClientPassword);
-//    _dio.options.headers = {'Authorization': 'Bearer $_accessToken'};
+//    dio.options.headers = {'Authorization': 'Bearer $_accessToken'};
 //    return _accessToken;
 //  }
 
   // Create a user - return the id
   Future<String> createUser(String id) async {
-    var r = await _dio.post('$_fqdn/openidm/managed/user?_action=create',
+    var r = await dio.post('$_fqdn/openidm/managed/user?_action=create',
         data: _userTemplate(id));
     if (r.statusCode == 201) {
       return r.data['_id'];
@@ -65,14 +59,14 @@ class IDMRest {
 
   Future<String> deleteUser(String id) async {
     var r =
-        await _dio.delete('$_fqdn/openidm/managed/user/$id', options: ifMatch);
+        await dio.delete('$_fqdn/openidm/managed/user/$id', options: ifMatch);
     return r.statusMessage;
   }
 
   // Look up the user and return the _id
   Future<String> queryUser(String userName) async {
     var q = {'userName': userName, '_queryFilter': 'userName eq "$userName"'};
-    var r = await _dio.get('$_fqdn/openidm/managed/user', queryParameters: q);
+    var r = await dio.get('$_fqdn/openidm/managed/user', queryParameters: q);
     var payload = r.data;
     // extract the uuid
     if( payload == null || payload['resultCount'] == 0 ) {
@@ -85,7 +79,7 @@ class IDMRest {
     var p = [
       {'operation': 'replace', 'field': '/sn', 'value': 'Updated-SN'}
     ];
-    var r = await _dio.patch('$_fqdn/openidm/managed/user/$id',
+    var r = await dio.patch('$_fqdn/openidm/managed/user/$id',
         options: ifMatch, data: p);
     return r.statusMessage;
   }
@@ -97,6 +91,4 @@ class IDMRest {
         'mail': '$id@test.com',
         'password': TestConfiguration.TEST_PASSWORD,
       };
-
-  void close() => _dio.close();
 }

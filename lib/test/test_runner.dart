@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:forgeops_smoke_test/rest/end_user_rest.dart';
 import 'package:forgeops_smoke_test/rest/idm_rest.dart';
 import 'test_configuration.dart';
 import '../rest/am_rest.dart';
@@ -34,6 +35,7 @@ class TestRunner {
   final TestConfiguration _config;
   AMRest amClient;
   IDMRest idmClient;
+  EndUserREST endUserClient;
   final List<TestResult> _results = [];
   final DateTime _startedAt;
   int _failed = 0; // count of failed tests
@@ -42,11 +44,11 @@ class TestRunner {
   List<TestResult> get testResults => _results;
   TestConfiguration get config => _config;
 
-
   TestRunner(this._config): _startedAt = DateTime.now() {
     // create the rest API clients for testing
     amClient = AMRest(_config);
     idmClient = IDMRest(_config, amClient);
+    endUserClient = EndUserREST(_config);
   }
 
   // Get results suitable for slack message
@@ -72,7 +74,6 @@ class TestRunner {
       'numberFailedTests' : _failed
     };
   }
-
 
   /// Run a test provided as a closure.
   Future<void> test(String test, TestFunction testFun) async {

@@ -11,6 +11,8 @@ class SmokeTest extends TestRunner {
       await amTests();
       await idmTests();
       await integrationTests();
+      await endUserTests();
+
     } catch (e) {
       print('Tests failed with exception ${e}');
       return false;
@@ -95,7 +97,14 @@ class SmokeTest extends TestRunner {
     });
   }
 
+  Future<void> endUserTests() async {
+    await test('End user login test ', ()  async {
+       await endUserClient.loginEndUser('user.1', TestConfiguration.TEST_PASSWORD);
+    });
+  }
+
   // todo: Clean up after all tests
   // This is where we want to delete any test users, etc.
   Future<void> cleanupTests() async {}
+
 }

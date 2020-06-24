@@ -1,33 +1,21 @@
 import 'package:dio/dio.dart';
-import 'package:dio_cookie_manager/dio_cookie_manager.dart';
-import 'package:cookie_jar/cookie_jar.dart';
 import 'dart:convert';
 import 'dart:math';
 import 'package:forgeops_smoke_test/forgerock_smoke_test.dart';
+import 'package:forgeops_smoke_test/rest/rest_client.dart';
 
 final _random = Random();
 
 // Make REST calls to ForgeRock AM.
-class AMRest {
+class AMRest  extends RESTClient {
   final String _amUrl;
   String _amCookie;
   final String _adminPassword;
-  final CookieJar _cookieJar;
-  final Dio _dio;
-  TestConfiguration _config;
 
-  AMRest(this._config)
-      : _dio = Dio(),
-        _cookieJar = CookieJar(),
-        _adminPassword = _config.amAdminPassword,
-        _amUrl = '${_config.fqdn}/am' {
-    // The cookie manager saves cookies such as iPlanetPro, and then
-    // sends back them on future requests.
-    _dio.interceptors.add(CookieManager(_cookieJar));
-    if (_config.debug) {
-      _dio.interceptors.add(LogInterceptor(responseBody: true));
-    }
-  }
+  AMRest(TestConfiguration t) :
+        _adminPassword = t.amAdminPassword,
+        _amUrl = '${t.fqdn}/am',
+        super(t);
 
   Future<String> authenticateAsAdmin() async {
     var headers = {
@@ -36,7 +24,7 @@ class AMRest {
       'Accept-API-Version': 'resource=2.1, protocol=1.0'
     };
 
-    var r = await _dio.post(
+    var r = await dio.post(
         '$_amUrl/json/realms/root/authenticate?authIndexType=service&authIndexValue=adminconsoleservice',
         options: RequestOptions(
             headers: headers, contentType: Headers.jsonContentType));
@@ -67,7 +55,7 @@ class AMRest {
         contentType: Headers.formUrlEncodedContentType,
         followRedirects: false,
         validateStatus: (status) => status < 500);
-    var r = await _dio.post('$_amUrl/oauth2/authorize',
+    var r = await dio.post('$_amUrl/oauth2/authorize',
         options: options,
         queryParameters: params,
         data: {'decision': 'Allow', 'csrf': _amCookie});
@@ -89,7 +77,7 @@ class AMRest {
         followRedirects: false,
         validateStatus: (status) => status < 500);
 
-    var r2 = await _dio.post('$_amUrl/oauth2/access_token',
+    var r2 = await dio.post('$_amUrl/oauth2/access_token',
         data: data, options: options);
     return r2.data['access_token'];
   }
@@ -103,7 +91,7 @@ class AMRest {
       'Authorization': auth,
     }, contentType: Headers.formUrlEncodedContentType);
 
-    var r = await _dio.post('$_amUrl/oauth2/access_token',
+    var r = await dio.post('$_amUrl/oauth2/access_token',
         data: {'grant_type': 'client_credentials'}, options: options);
 
     return r.data['access_token'];
@@ -119,7 +107,7 @@ class AMRest {
       'Authorization': auth,
     }, contentType: Headers.formUrlEncodedContentType);
 
-    var r = await _dio.post('$_amUrl/oauth2/access_token',
+    var r = await dio.post('$_amUrl/oauth2/access_token',
         data: {'grant_type': 'client_credentials'}, options: options);
 
     return r.data['access_token'];
@@ -131,7 +119,7 @@ class AMRest {
   // https://openid.net/specs/openid-connect-core-1_0-17.html#codeExample
   Future<Map<String, Object>> registerOAuthClient(String token) async {
     var options = Options(headers: {'Authorization': 'Bearer $token'});
-    var r = await _dio.post('$_amUrl/oauth2/register',
+    var r = await dio.post('$_amUrl/oauth2/register',
         data: {
           'redirect_uris': ['https://fake.com'],
           'client name': 'Test Client',
@@ -152,12 +140,12 @@ class AMRest {
 
     // we dont want to reuse saved cookies - so create a new request
     var _d = Dio();
-    if (_config.debug) {
+    if (testConfig.debug) {
       _d.interceptors.add(LogInterceptor());
     }
 
     var r = await _d.post(regURl, queryParameters: q, options: options);
-    _check200(r);
+    check200(r);
 
     var copyMap = jsonDecode(jsonEncode(r.data))
         as Map<String, Object>; // kludgy, but works
@@ -182,16 +170,8 @@ class AMRest {
 
     r = await _d.post(regURl,
         queryParameters: q, options: options, data: copyMap);
-    _check200(r);
+    check200(r);
     r.data['userId'] = user; // we add the user id in case future tests need it
     return r.data as Map;
   }
-
-  void _check200(Response r) {
-    if (r.statusCode != 200) {
-      throw Exception('Response error=${r.statusCode} msg=${r.statusMessage}');
-    }
-  }
-
-  void close() => _dio.close();
 }
