@@ -12,7 +12,6 @@ class SmokeTest extends TestRunner {
       await idmTests();
       await integrationTests();
       await endUserTests();
-
     } catch (e) {
       print('Tests failed with exception ${e}');
       return false;

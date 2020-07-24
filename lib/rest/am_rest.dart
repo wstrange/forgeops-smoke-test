@@ -25,7 +25,7 @@ class AMRest  extends RESTClient {
     };
 
     var r = await dio.post(
-        '$_amUrl/json/realms/root/authenticate?authIndexType=service&authIndexValue=adminconsoleservice',
+        '$_amUrl/json/authenticate?realm=/&authIndexType=service&authIndexValue=ldapService',
         options: RequestOptions(
             headers: headers, contentType: Headers.jsonContentType));
     _amCookie = r.data['tokenId'];

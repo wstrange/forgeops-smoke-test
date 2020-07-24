@@ -1,12 +1,10 @@
-import 'package:dio/dio.dart';
 import 'package:forgeops_smoke_test/forgerock_smoke_test.dart';
-import 'package:dio_cookie_manager/dio_cookie_manager.dart';
-import 'package:cookie_jar/cookie_jar.dart';
 import 'package:forgeops_smoke_test/rest/rest_client.dart';
 
 // A Client that makes end user UI requests
 //
 class EndUserREST extends RESTClient {
+
   String get _fqdn => testConfig.fqdn;
 
   EndUserREST(TestConfiguration c) : super(c);
@@ -27,7 +25,7 @@ class EndUserREST extends RESTClient {
   // path we want:   callbacks[0].[
 
   Future<String> loginEndUser(String userId, String password) async {
-
+    clearCookies();
     var r = await dio.post('$_fqdn/am/json/realms/root/authenticate');
 
    check200(r);

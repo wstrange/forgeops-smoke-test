@@ -17,6 +17,13 @@ abstract class RESTClient {
     if (testConfig.debug) {
       _dio.interceptors.add(LogInterceptor(responseBody: true));
     }
+    clearCookies();
+  }
+
+  // This is a work around for Dio cookie manager - which uses static storage
+  // for cookies. https://github.com/flutterchina/cookie_jar/issues/22
+  void clearCookies() {
+    (_cookieJar as DefaultCookieJar).deleteAll();
   }
 
   void check200(Response r) {
