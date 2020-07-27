@@ -90,11 +90,13 @@ class SmokeTest extends TestRunner {
       }
     });
 
-    await test('Self Registration Test', () async {
-      var m = await amClient.selfRegisterUser();
-      expect(m['tokenId'] != null,
-          message: 'tokenId missing in registration response');
-    });
+    // TODO: When self registration gets properly integrated restore this test
+//
+//    await test('Self Registration Test', () async {
+//      var m = await amClient.selfRegisterUser();
+//      expect(m['tokenId'] != null,
+//          message: 'tokenId missing in registration response');
+//    });
   }
 
   Future<void> endUserTests() async {
