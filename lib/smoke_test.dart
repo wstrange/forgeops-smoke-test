@@ -2,6 +2,8 @@ import 'test/test_configuration.dart';
 
 import 'test/test_runner.dart';
 
+/// Run Smoke Tests. These are simple tests for basic functionality. Tests
+/// here should run quickly.
 class SmokeTest extends TestRunner {
   SmokeTest(TestConfiguration config) : super(config);
 
@@ -91,12 +93,12 @@ class SmokeTest extends TestRunner {
     });
 
     // TODO: When self registration gets properly integrated restore this test
-//
-//    await test('Self Registration Test', () async {
-//      var m = await amClient.selfRegisterUser();
-//      expect(m['tokenId'] != null,
-//          message: 'tokenId missing in registration response');
-//    });
+
+    await test('Self Registration Test', () async {
+      var m = await amClient.selfRegisterUser();
+      expect(m['tokenId'] != null,
+          message: 'tokenId missing in registration response');
+    });
   }
 
   Future<void> endUserTests() async {
