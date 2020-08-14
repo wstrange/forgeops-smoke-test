@@ -11,11 +11,11 @@
 <p>Run a series of tests against a target deployment of ForgeOps.</p>
 <p>You can use curl or REST to run the smoke test. For example:</p>
 <pre>
-    curl 'https://smoketest-7escakmhgq-uk.a.run.app/test' \
+    curl 'https://smoketest.forgeops.com/test' \
       --data 'fqdn=nightly.iam.forgeops.com&amadminPassword=p3tqhd07v4u6aekvhivj952ffionwwf1'
 </pre>
 
-<p>Or use this form for manual testing:</p>
+<p>Or use this form for manual testing (this just does a POST to the /test endpoint):</p>
 
 <form action="/test" method="post">
     <label for="fqdn">FQDN:</label>
