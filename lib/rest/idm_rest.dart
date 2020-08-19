@@ -22,7 +22,7 @@ class IDMRest extends RESTClient {
     _accessToken = await _amRest.authCodeFlow(
         redirectUrl: oauth2redirectUrl,
         client_id: _adminClientId,
-        scopes: ['openid']);
+        scopes: ['openid','fr:idm:*']);
 
     // set the dio base options for the bearer token
     // this wil add the bearer token to all future requests.

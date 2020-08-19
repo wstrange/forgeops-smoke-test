@@ -48,7 +48,7 @@ class AMRest  extends RESTClient {
       'redirect_uri': redirectUrl,
       'client_id': client_id,
       'response_type': 'code',
-      'scope': 'openid', // todo: fix scopes
+      'scope': scopes.join(' '),
     };
     var options = Options(
         headers: headers,
