@@ -131,7 +131,7 @@ class AMRest  extends RESTClient {
     return r.data as Map<String, Object>;
   }
 
-  // Self register a test use.
+  // Self register a test user.
   Future<Map> selfRegisterUser() async {
     var regURl = '$_amUrl/json/realms/root/authenticate';
     var q = {'authIndexType': 'service', 'authIndexValue': 'Registration'};

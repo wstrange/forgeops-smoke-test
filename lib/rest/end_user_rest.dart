@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:forgeops_smoke_test/forgerock_smoke_test.dart';
 import 'package:forgeops_smoke_test/rest/rest_client.dart';
 
@@ -26,19 +27,26 @@ class EndUserREST extends RESTClient {
 
   Future<String> loginEndUser(String userId, String password) async {
     clearCookies();
-    var r = await dio.post('$_fqdn/am/json/realms/root/authenticate');
+    //var r = await dio.post('$_fqdn/am/json/realms/root/authenticate');
 
-   check200(r);
+    // var r = await dio.post('$_fqdn/login/?realm=/#/');
+    // check200(r);
+
+    var r = await dio.post('$_fqdn/am/json/realms/root/authenticate?realm=%2F');
+
+    check200(r);
+
     var callbacks = r.data['callbacks'];
     callbacks[0]['input'][0]['value'] = userId;
     callbacks[1]['input'][0]['value'] = password;
 
-    r = await dio.post('$_fqdn/am/json/realms/root/authenticate', data:  r.data);
+    r = await dio.post('$_fqdn/am/json/realms/root/authenticate?realm=%2F', data:  r.data);
     check200(r);
     var tokenId = r.data['tokenId'];
 
+    var headers = { 'accept-api-version': 'protocol=1.0,resource=2.0' };
     // get the users id
-    r = await dio.post('$_fqdn/am/json/users/?_action=idFromSession');
+    r = await dio.post('$_fqdn/am/json/users?_action=idFromSession', options:Options(headers: headers) );
     check200(r);
 
     var id = r.data['id'];
