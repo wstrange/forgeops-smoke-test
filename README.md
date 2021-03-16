@@ -55,4 +55,6 @@ Running the test will:
 
 ## TODO
 
+* Improve the output. Support pretty printed html?
+* Refactor / reorganize tests. Make them easier to understand the flow
 

@@ -27,10 +27,6 @@ class EndUserREST extends RESTClient {
 
   Future<String> loginEndUser(String userId, String password) async {
     clearCookies();
-    //var r = await dio.post('$_fqdn/am/json/realms/root/authenticate');
-
-    // var r = await dio.post('$_fqdn/login/?realm=/#/');
-    // check200(r);
 
     var r = await dio.post('$_fqdn/am/json/realms/root/authenticate?realm=%2F');
 

@@ -53,7 +53,9 @@ void main(List<String> args) async {
 
     if (testOK) {
       await sendSlackUpdate(
-          slackUrl, '$hostString\n\n${test.getPrettyResults()}');
+          // slackUrl, '$hostString\n\n${test.getPrettyResults()}');
+          // Make slack message shorter.
+          slackUrl, '$hostString test OK $fqdn');
       return Response.ok(_results2Json(test),
           headers: {'content-type': 'application/json'});
     } else {
