@@ -4,7 +4,7 @@ import 'package:dio/dio.dart';
 
 final _dio = Dio();
 
-Future<void> sendSlackUpdate(String url, String text, {String channel = '#cloud-deploy-notify', bool showFailIcon = false}) async {
+Future<void> sendSlackUpdate(String url, String text, {String channel = '#forgeops-notify', bool showFailIcon = false}) async {
   if( url == null || url.length < 20) {
     print('slack url not configured');
     return; // no slack url configured
