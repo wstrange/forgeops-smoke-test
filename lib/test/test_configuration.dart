@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 class TestConfiguration {
-  String fqdn;
-  String amAdminPassword;
-  bool debug;
+  late String fqdn;
+  late String amAdminPassword;
+  late bool debug;
 
   static final TEST_PASSWORD = 'Bar1Foo2'; // for creating users, self registration
 

@@ -15,15 +15,14 @@ import 'package:forgeops_smoke_test/forgerock_smoke_test.dart';
 /// edit the parameters above, and run "dart bin/main.dart"
 void main() async {
 
-  var slack = Platform.environment['SLACK_URL'];
+  // var slack = Platform.environment['SLACK_URL'];
   var testJson = File('test.json').readAsStringSync();
 
   var cfg = TestConfiguration.fromJson(testJson);
   var test = SmokeTest(cfg);
-  var testOK = false;
 
   try {
-    testOK = await test.runSmokeTest();
+    await test.runSmokeTest();
     //await sendSlackUpdate(slack,test.getPrettyResults());
   }
   catch(e) {

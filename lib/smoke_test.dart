@@ -13,9 +13,9 @@ class SmokeTest extends TestRunner {
       await amTests();
       await idmTests();
       await integrationTests();
-      await endUserTests();
+      // await endUserTests();
     } catch (e) {
-      print('Tests failed with exception ${e}');
+      print('Tests failed with exception $e');
       return false;
     }
     return failed == 0; // all tests passed?
@@ -24,8 +24,7 @@ class SmokeTest extends TestRunner {
   // Run all the AM tests
   Future<void> amTests() async {
     await test('Authenticate as AMAdmin', () async {
-      var token = await amClient.authenticateAsAdmin();
-      expect(token != null, message: 'Cant authenticate as amadmin');
+      await amClient.authenticateAsAdmin();
     });
 
 //    await test('Dynamic client registration', () async {
@@ -44,12 +43,12 @@ class SmokeTest extends TestRunner {
 
   // Run all IDM tests
   Future<void> idmTests() async {
-    String uuid;
+    String? uuid;
     var testUser = 'testuser01';
 
     await test('IDM Login as Admin', () async {
-      var idm_access_token = await idmClient.getBearerToken();
-      expect(idm_access_token != null);
+      // sets the cookie as a side effect
+      await idmClient.getBearerToken();
     });
 
     await test('IDM Admin Create a user', () async {
@@ -63,11 +62,11 @@ class SmokeTest extends TestRunner {
     });
 
     await test('IDM Modify User', () async {
-      await idmClient.modifyUser(uuid);
+      await idmClient.modifyUser(uuid!);
     });
 
     await test('IDM Delete user', () async {
-      await idmClient.deleteUser(uuid);
+      await idmClient.deleteUser(uuid!);
     });
 
     // search for a user that does not exist
@@ -85,7 +84,7 @@ class SmokeTest extends TestRunner {
     await Future.forEach([1, 2, 3, 4, 5], (i) async {
       var user = 'user.$i';
       var uuid = await idmClient.queryUser(user);
-
+      print('uuid=$uuid ********');
       if (uuid == null) {
         await idmClient.createUser(user);
       }
@@ -93,7 +92,7 @@ class SmokeTest extends TestRunner {
 
     await test('Self Registration Test', () async {
       var m = await amClient.selfRegisterUser();
-      expect(m['tokenId'] != null,
+      expect(m!['tokenId'] != null,
           message: 'tokenId missing in registration response');
     });
   }

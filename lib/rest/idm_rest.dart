@@ -8,7 +8,7 @@ import 'am_rest.dart';
 class IDMRest extends RESTClient {
   final AMRest _amRest;
   final String _adminClientId = 'idm-admin-ui'; // id of the idm admin client
-  String _accessToken;
+  late String _accessToken;
 
   String get _fqdn => testConfig.fqdn;
 
@@ -57,14 +57,14 @@ class IDMRest extends RESTClient {
 
   Options ifMatch = Options(headers: {'if-match': '*'});
 
-  Future<String> deleteUser(String id) async {
+  Future<String?> deleteUser(String id) async {
     var r =
         await dio.delete('$_fqdn/openidm/managed/user/$id', options: ifMatch);
     return r.statusMessage;
   }
 
   // Look up the user and return the _id
-  Future<String> queryUser(String userName) async {
+  Future<String?> queryUser(String userName) async {
     var q = {'userName': userName, '_queryFilter': 'userName eq "$userName"'};
     var r = await dio.get('$_fqdn/openidm/managed/user', queryParameters: q);
     var payload = r.data;
@@ -75,7 +75,7 @@ class IDMRest extends RESTClient {
     return payload['result'].first['_id'];
   }
 
-  Future<String> modifyUser(String id) async {
+  Future<String?> modifyUser(String id) async {
     var p = [
       {'operation': 'replace', 'field': '/sn', 'value': 'Updated-SN'}
     ];

@@ -38,7 +38,7 @@ class EndUserREST extends RESTClient {
 
     r = await dio.post('$_fqdn/am/json/realms/root/authenticate?realm=%2F', data:  r.data);
     check200(r);
-    var tokenId = r.data['tokenId'];
+    // var tokenId = r.data['tokenId'];
 
     var headers = { 'accept-api-version': 'protocol=1.0,resource=2.0' };
     // get the users id

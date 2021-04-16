@@ -9,7 +9,7 @@ final _random = Random();
 // Make REST calls to ForgeRock AM.
 class AMRest  extends RESTClient {
   final String _amUrl;
-  String _amCookie;
+  late String _amCookie;
   final String _adminPassword;
 
   AMRest(TestConfiguration t) :
@@ -26,7 +26,7 @@ class AMRest  extends RESTClient {
 
     var r = await dio.post(
         '$_amUrl/json/authenticate?realm=/&authIndexType=service&authIndexValue=ldapService',
-        options: RequestOptions(
+        options: Options(
             headers: headers, contentType: Headers.jsonContentType));
     _amCookie = r.data['tokenId'];
     return _amCookie;
@@ -39,10 +39,8 @@ class AMRest  extends RESTClient {
   // this is done as the user amadmin - so we get an access
   // token that can be used for IDM.
   Future<String> authCodeFlow(
-      {String redirectUrl, String client_id, List<String> scopes}) async {
-    if (_amCookie == null) {
-      await authenticateAsAdmin();
-    }
+      {required String redirectUrl, required String client_id, required List<String> scopes}) async {
+
     var headers = {'accept-api-version': 'resource=2.1'};
     var params = {
       'redirect_uri': redirectUrl,
@@ -54,13 +52,13 @@ class AMRest  extends RESTClient {
         headers: headers,
         contentType: Headers.formUrlEncodedContentType,
         followRedirects: false,
-        validateStatus: (status) => status < 500);
+        validateStatus: (status) => status! < 500);
     var r = await dio.post('$_amUrl/oauth2/authorize',
         options: options,
         queryParameters: params,
         data: {'decision': 'Allow', 'csrf': _amCookie});
     var loc_header = r.headers.value('location');
-    var auth_code = _codeRegex.firstMatch(loc_header).group(0);
+    var auth_code = _codeRegex.firstMatch(loc_header!)!.group(0);
 
     var data = {
       'grant_type': 'authorization_code',
@@ -75,7 +73,7 @@ class AMRest  extends RESTClient {
         },
         contentType: Headers.formUrlEncodedContentType,
         followRedirects: false,
-        validateStatus: (status) => status < 500);
+        validateStatus: (status) => status! < 500);
 
     var r2 = await dio.post('$_amUrl/oauth2/access_token',
         data: data, options: options);
@@ -98,8 +96,8 @@ class AMRest  extends RESTClient {
   }
 
   Future<String> getOAuth2TokenResourceOwnerFlow(
-      String clientId, String clientPassword,
-      [String user = 'amadmin', String password]) async {
+      String clientId, String clientPassword
+     ) async {
     var auth =
         'Basic ' + base64Encode(utf8.encode('$clientId:$clientPassword'));
 
@@ -132,10 +130,11 @@ class AMRest  extends RESTClient {
   }
 
   // Self register a test user.
-  Future<Map> selfRegisterUser() async {
+  Future<Map?> selfRegisterUser() async {
     var regURl = '$_amUrl/json/realms/root/authenticate';
     var q = {'authIndexType': 'service', 'authIndexValue': 'Registration'};
-    var options = RequestOptions(
+
+    var options = Options(
         headers: {'accept-api-version': 'protocol=1.0,resource=2.1'});
 
     // we dont want to reuse saved cookies - so create a new request
@@ -144,12 +143,24 @@ class AMRest  extends RESTClient {
       _d.interceptors.add(LogInterceptor());
     }
 
+
+    // try {
+    //   var r = await _d.post(regURl, queryParameters: q, options: options);
+    //   check200(r);
+    // }
+    // catch(e) {
+    //
+    // }
     var r = await _d.post(regURl, queryParameters: q, options: options);
     check200(r);
 
-    var copyMap = jsonDecode(jsonEncode(r.data))
-        as Map<String, Object>; // kludgy, but works
-    var callbacks = copyMap['callbacks'] as List;
+    // blowing up here...
+
+    // var copyMap = jsonDecode(jsonEncode(r.data))
+    //     as Map<String, Object>; // kludgy, but works
+    // var callbacks = copyMap['callbacks'] as List;
+
+    var callbacks = r.data['callbacks'];
 
     var rand = _random.nextInt(1000000);
     var user = 'tuser$rand';
@@ -168,10 +179,21 @@ class AMRest  extends RESTClient {
     callbacks[8]['input'][1]['value'] = 'forgerock';
     callbacks[9]['input'][0]['value'] = true;
 
-    r = await _d.post(regURl,
-        queryParameters: q, options: options, data: copyMap);
-    check200(r);
-    r.data['userId'] = user; // we add the user id in case future tests need it
-    return r.data as Map;
+    var j = json.encode(callbacks);
+
+    Map? data;
+
+    try {
+      r = await _d.post(regURl,
+          queryParameters: q, options: options, data: callbacks);
+      check200(r);
+      data = r.data;
+
+
+    } catch(e) {
+      print('Got **** $e');
+    }
+    // data?['userId'] = user; // we add the user id in case future tests need it
+    return data;
   }
 }

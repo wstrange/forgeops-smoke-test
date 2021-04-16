@@ -4,8 +4,8 @@ import 'package:dio/dio.dart';
 
 final _dio = Dio();
 
-Future<void> sendSlackUpdate(String url, String text, {String channel = '#cloud-deploy-notify', bool showFailIcon = false}) async {
-  if( url == null || url.length < 20) {
+Future<void> sendSlackUpdate(String url, String text, {String channel = '#forgeops-notify', bool showFailIcon = false}) async {
+  if(url.length < 20) {
     print('slack url not configured');
     return; // no slack url configured
   }
@@ -21,11 +21,11 @@ Future<void> sendSlackUpdate(String url, String text, {String channel = '#cloud-
     'icon_emoji': icon,
   });
   try {
-    var r = await _dio.post(url, data: {'payload': j });
+    await _dio.post(url, data: {'payload': j });
   }
   catch(e) {
     if( e is DioError ) {
-      print('url = $url ${e.response.statusMessage} ${e.response.statusCode}');
+      print('url = $url ${e.response?.statusMessage} ${e.response?.statusCode}');
     }
     print('error sending to slack $e');
   }

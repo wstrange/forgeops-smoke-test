@@ -34,7 +34,7 @@ class TestRunner {
   static final NUM_FAILED_ALLOWED = 1;
   final TestConfiguration _config;
   AMRest amClient;
-  IDMRest idmClient;
+  late IDMRest idmClient;
   EndUserREST endUserClient;
   final List<TestResult> _results = [];
   final DateTime _startedAt;
@@ -44,11 +44,12 @@ class TestRunner {
   List<TestResult> get testResults => _results;
   TestConfiguration get config => _config;
 
-  TestRunner(this._config): _startedAt = DateTime.now() {
+  TestRunner(this._config): _startedAt = DateTime.now(),
+        endUserClient = EndUserREST(_config),
+        amClient = AMRest(_config)
+  {
     // create the rest API clients for testing
-    amClient = AMRest(_config);
     idmClient = IDMRest(_config, amClient);
-    endUserClient = EndUserREST(_config);
   }
 
   // Get results suitable for slack message
@@ -84,7 +85,7 @@ class TestRunner {
       _results.add(TestResult(test, msg, true, _testTime(_start)));
     } on DioError catch (e) {
       if( e.response != null ) {
-        msg = '${e.response.statusCode} ${e.response.statusMessage}}';
+        msg = '${e.response?.statusCode} ${e.response?.statusMessage}}';
       }
       else  {
         msg = '${e.request} ${e.message}';

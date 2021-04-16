@@ -44,7 +44,7 @@ void main(List<String> args) async {
     var _debug = (d != null && d == 'true') ? true : false;
 
     var cfg =
-        TestConfiguration('https://$fqdn', param['amadminPassword'], debug: _debug);
+        TestConfiguration('https://$fqdn', param['amadminPassword']!, debug: _debug);
     var test = SmokeTest(cfg);
     var testOK = await test.runSmokeTest();
     await test.close();
@@ -55,18 +55,18 @@ void main(List<String> args) async {
       await sendSlackUpdate(
           // slackUrl, '$hostString\n\n${test.getPrettyResults()}');
           // Make slack message shorter.
-          slackUrl, '$hostString test OK $fqdn');
+          slackUrl!, '$hostString test OK $fqdn');
       return Response.ok(_results2Json(test),
           headers: {'content-type': 'application/json'});
     } else {
       await sendSlackUpdate(
-          slackUrl, '$hostString\n\n${test.getPrettyResults()}',
+          slackUrl!, '$hostString\n\n${test.getPrettyResults()}',
           showFailIcon: true);
       return Response.internalServerError(body: _results2Json(test));
     }
   });
 
-  var handler = Cascade().add(staticHandler).add(app.handler).handler;
+  var handler = Cascade().add(staticHandler).add(app).handler;
 
   // Pipelines compose middleware plus a single handler
   var pipe = const Pipeline().addMiddleware(logRequests()).addHandler(handler);
